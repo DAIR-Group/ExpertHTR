@@ -1,6 +1,7 @@
 # ExpertHTR
 
-<p align="center"><em>Unified Multi-Task Learning with Language-Guided Experts for Handwritten Text Recognition</em></p>
+<p align="center"><em>Unified Handwritten Text Recognition with Multi-Task Learning and Sparse
+Mixture-of-Experts</em></p>
 
 <p align="center">
   Dang Hoai Nam &middot; Nguyen Duy Hieu &middot; Vo Nguyen Le Duy
