@@ -1,210 +1,115 @@
 # ExpertHTR
 
-> Sparsegen-routed mixture-of-experts for full-input handwritten text recognition.
+<p align="center"><em>Unified Multi-Task Learning with Language-Guided Experts for Handwritten Text Recognition</em></p>
 
-ExpertHTR is a reproducibility artifact for a [Qwen3.5-0.8B-Base](https://huggingface.co/Qwen/Qwen3.5-0.8B-Base)-based handwritten-text-recognition pipeline. It fine-tunes a dense HTR checkpoint with answer-only, full-input multi-task supervision, then expands six decoder MLPs into a **four-routed-expert plus one shared-expert** mixture. The released reference arm combines native Sparsegen routing, a LamSparse regularizer, and a small Switch-style routed-expert load-balance penalty.
+<p align="center">
+  Dang Hoai Nam &middot; Nguyen Duy Hieu &middot; Vo Nguyen Le Duy
+</p>
 
-The repository is deliberately designed for paper review:
+ExpertHTR is a handwritten text recognition system built on
+[Qwen3.5-0.8B-Base](https://huggingface.co/Qwen/Qwen3.5-0.8B-Base). It learns
+four related tasks together—page transcription, line counting, phrase-to-line
+localization, and line-span transcription—and uses a Sparse Mixture-of-Experts
+(MoE) layer to adapt the model for diverse handwriting datasets.
 
-- the canonical runtime is a Python CLI; the notebook is an optional walkthrough only;
-- all dataset/model/checkpoint paths are explicit inputs rather than hidden local assumptions;
-- checkpoint compatibility, atomic-marker IDs, source scope, record counts, and test-selection rules are checked at runtime;
-- raw data, model weights, prediction files, and experiment outputs are excluded from Git.
+<p align="center">
+  <img src="docs/assets/experthtr-architecture.png" alt="ExpertHTR architecture" width="1000">
+</p>
 
-## What this repository contains
+## Highlights
 
-```text
-ExpertHTR/
-├── configs/
-│   ├── moe_balance.yaml          # frozen paper-facing experiment contract
-│   └── paths.env.example         # non-secret path template
-├── docs/
-│   ├── ARCHITECTURE.md           # exact MoE and loss definitions
-│   ├── RESULTS.md                # manuscript-aligned results and evidence gate
-│   ├── CLI.md                    # Python commands and phase contracts
-│   ├── DATASET_AND_TASKS.md      # data scope and task grammars
-│   ├── EVALUATION.md             # selection, test, and metric protocol
-│   ├── IMPLEMENTATION_SURVEY.md  # MoE implementation patterns consulted
-│   ├── RELEASE_CHECKLIST.md      # pre-GitHub / pre-submission gate
-│   └── REPRODUCIBILITY.md        # end-to-end run contract
-├── examples/
-│   └── demo_moe_balance.ipynb    # optional CLI walkthrough; no implementation
-├── scripts/
-│   ├── check_release.py          # static contract validation
-│   ├── check_python_contract.py  # validates/compiles named Python modules
-│   ├── check_demo_notebook.py    # keeps the notebook presentation-only
-│   └── build_run_manifest.py     # records hashes and runtime provenance
-├── src/experthtr/
-│   ├── cli.py                    # `experthtr <command>` entry point
-│   ├── workflow.py               # explicit phase composition
-│   ├── data/                     # dataset contract, JSONL records, loaders
-│   ├── modeling/                 # Qwen loading, dense transfer, Sparsegen MoE
-│   ├── training/                 # objective, checkpointing, train loop
-│   ├── evaluation/               # CER/WER and final held-out test
-│   ├── analysis/                 # routing and position diagnostics
-│   └── audit/                    # token/image/prompt audit
-├── requirements-core.txt
-├── CITATION.cff                  # temporary manuscript citation metadata
-├── DATA_LICENSES.md              # dataset provenance and license boundary
-├── LICENSE                       # Apache-2.0 for original code/documentation
-├── MODEL_CARD.md                 # model/checkpoint release boundary
-└── NOTICE                        # copyright and third-party attribution notice
-```
+- Multi-task training for page-level handwritten text recognition.
+- Sparse MoE with four routed experts and one shared expert.
+- Evaluated on seven handwriting benchmarks: BRESSAY, Bentham, HWDB2.0, IAM,
+  ICFHR2016, RIMES, and ScribbleLens.
+- **2.92% CER on IAM page-level evaluation** in the current manuscript table.
 
-Contribution and review rules are in [CONTRIBUTING.md](CONTRIBUTING.md). They
-make explicit which changes require a new token audit or a separately named
-ablation.
+## Installation
 
-## Reference experiment
-
-| Component | Frozen reference setting |
-| --- | --- |
-| Initialization | Verified dense HTR checkpoint, then one MoE continuation epoch |
-| Sources | BRESSAY, Bentham, HWDB2.0, IAM, ICFHR2016, Images_Courriers, ScribbleLens |
-| Explicit exclusion | EPARCHOS |
-| Train / valid / test records | 20,388 / 962 / 1,327 |
-| Training tasks | Full-input HTR, line count, phrase-to-line lookup, line-span HTR |
-| MoE placement | Decoder MLP layers 1, 5, 9, 13, 17, 21 |
-| Experts per selected layer | 4 routed + 1 always-active shared expert |
-| Router | Native Sparsegen; no fixed Top-*k*; router CE = 0 |
-| Regularization | LamSparse = 0.01 and routed-expert load balance = 0.01, each warmed up over 10% of one epoch |
-| Resolution / context | Area-ratio resize, 589,824–1,572,864 pixels; 2,560 multimodal tokens |
-| Training | AdamW, LR 1e-6, weight decay 0.01, effective batch 32, cosine schedule |
-| Selection | Minimum validation micro page-CER |
-| Test | Greedy decoding, batch size 1, max 1,024 new tokens, only after validation selection |
-
-The reference configuration is machine-checked by:
+Python 3.10+ and a CUDA-capable GPU are recommended for training.
 
 ```bash
-python scripts/check_release.py
-python scripts/check_python_contract.py
-```
+git clone <YOUR_GITHUB_REPOSITORY_URL>
+cd ExpertHTR
 
-## Reported results
-
-The current manuscript-aligned table is in [docs/RESULTS.md](docs/RESULTS.md).
-Sparse MoE records **2.92% CER on IAM page-level evaluation** in that table,
-compared with 3.03% for the strongest previously reported IAM value shown.
-This is a provisional comparison until the cited baselines, exact evaluation
-protocol, checkpoint manifests, token audit, and predictions are archived.
-
-## Quick start
-
-### 1. Prepare an offline runtime
-
-This artifact expects a local/offline installation of the Qwen3.5 model and its compatible `transformers` stack. The small `requirements-core.txt` is only a minimal dependency declaration; it is **not** a lock file. For a paper result, preserve the exact wheelhouse, model revision, and `pip freeze` from the run environment.
-
-```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
 python -m pip install -e .
 python -m pip install -r requirements-core.txt
 ```
 
-### 2. Supply data and a dense initialization checkpoint
+You also need a local copy of Qwen3.5-0.8B-Base and a dense HTR initialization
+checkpoint. The repository does not include model weights or raw datasets.
 
-The repository does not redistribute the eight original corpora, the derived `page_multitask` JSONL bundle, Qwen weights, or checkpoints. Follow their original access terms, construct the canonical artifact, and set the paths as environment variables. The Python configuration module is [`src/experthtr/config/reference.py`](src/experthtr/config/reference.py); do not commit a local path edit.
+## Data and checkpoints
+
+Set paths to your local data, model, checkpoint, and output directory:
 
 ```bash
 export HWVLM_DATA_ROOT=/path/to/mthtr
 export HWVLM_MODEL_NAME=/path/to/Qwen3.5-0.8B-Base
-export HWVLM_DENSE_INIT_CHECKPOINT=/path/to/selected/dense/checkpoint
-export HWVLM_OUTPUT_ROOT=/path/to/writable/outputs
+export HWVLM_DENSE_INIT_CHECKPOINT=/path/to/dense/checkpoint
+export HWVLM_OUTPUT_ROOT=/path/to/outputs
 ```
 
-The required inputs are:
+The reference experiment uses 20,388 training, 962 validation, and 1,327 test
+records. Follow the original access terms for each dataset. More details are in
+[DATA_LICENSES.md](DATA_LICENSES.md) and
+[docs/DATASET_AND_TASKS.md](docs/DATASET_AND_TASKS.md).
 
-```text
-HWVLM_DATA_ROOT                  # mthtr root or page_multitask directory
-HWVLM_OFFLINE_BUNDLE_ROOT        # wheelhouse/model bundle, if used
-HWVLM_MODEL_NAME                 # Qwen3.5-0.8B-Base directory
-HWVLM_DENSE_INIT_CHECKPOINT      # exact selected dense checkpoint directory
-HWVLM_OUTPUT_ROOT                # writable parent directory for this run
-```
-
-Use [`configs/paths.env.example`](configs/paths.env.example) as a non-secret template. The dense checkpoint is required by default. A fresh-base run is a separately labeled control, not a replacement for the reference continuation.
-
-### 3. Run the Python workflow
-
-The normal research workflow is command-line driven. Each command composes exactly the named phases it needs, so there is no hidden notebook state or cell-order dependency.
+## Training and evaluation
 
 ```bash
-# Validate named Python phases without loading a model or dataset.
+# Check that the package is installed correctly.
 experthtr --validate-imports
 
-# Mandatory after a data/image/processor/prompt/resize/context change.
+# Audit the dataset and token budget before a new experiment.
 experthtr audit
 
-# One dense-initialized MoE continuation epoch; validation selects the checkpoint.
+# Train Sparse MoE from the dense HTR checkpoint.
 experthtr train
 
-# Run only after validation selection. This is never part of train.
-HWVLM_FINAL_TEST_CHECKPOINT=/path/to/validation-selected/checkpoint \\
-  experthtr final-test
-
-# Routing analysis and position diagnostics require a matching Sparsegen checkpoint.
-HWVLM_ROUTING_ANALYSIS_CHECKPOINT=/path/to/validation-selected/checkpoint \\
-HWVLM_ROUTING_ANALYSIS_OUTPUT=/path/to/writable/routing_figures \\
-  experthtr routing
-HWVLM_POSITION_DIAG_CHECKPOINT=/path/to/validation-selected/checkpoint \\
-HWVLM_POSITION_DIAG_OUTPUT=/path/to/writable/position_diagnostics \\
-  experthtr position-diagnostics
+# Evaluate the checkpoint selected on validation data.
+HWVLM_FINAL_TEST_CHECKPOINT=/path/to/selected/checkpoint experthtr final-test
 ```
 
-Use `experthtr COMMAND --print-phases` to inspect the exact implementation order for any command. [`examples/demo_moe_balance.ipynb`](examples/demo_moe_balance.ipynb) merely mirrors these calls for interactive teaching; it contains no training or evaluation logic. The rationale for the package design is in [`docs/IMPLEMENTATION_SURVEY.md`](docs/IMPLEMENTATION_SURVEY.md).
+See [docs/CLI.md](docs/CLI.md) for all commands and
+[docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md) for the full experiment setup.
 
-The final-test command intentionally uses `batch_size=1`: its seconds/page figure is latency, not batch-throughput.
+## Results
 
-### 4. Freeze provenance beside the chosen checkpoint
+CER (%) on the seven evaluation datasets; lower is better.
 
-```bash
-python scripts/build_run_manifest.py \
-  --data-root /path/to/mthtr \
-  --checkpoint /path/to/selected/checkpoint \
-  --model-dir /path/to/Qwen3.5-0.8B-Base \
-  --output /path/to/output/run_manifest.json
+| Method | BRES. | Bent. | HWDB | IAM | READ | RIMES | Scrib. |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Qwen3.5 Base | 51.94 | 27.13 | 25.43 | 11.55 | 124.49 | 31.66 | 91.45 |
+| **Sparse MoE** | **19.96** | **17.57** | **4.63** | **2.92** | **52.23** | **5.59** | **42.52** |
+
+The complete comparison table and notes are in [docs/RESULTS.md](docs/RESULTS.md).
+
+## Repository structure
+
+```text
+ExpertHTR/
+├── configs/          # Reference configuration and path template
+├── docs/             # Architecture, data, evaluation, and reproducibility notes
+├── examples/         # Optional notebook walkthrough
+├── scripts/          # Release checks and run-manifest utility
+├── src/experthtr/    # Main Python package
+├── DATA_LICENSES.md  # Dataset license and provenance boundary
+├── MODEL_CARD.md     # Model and checkpoint release information
+└── requirements-core.txt
 ```
 
-Keep the generated manifest, the checkpoint's own manifest, token-audit report, validation predictions, final-test predictions, and the exact runtime package list with the submitted result. Do not commit weights or restricted data to the public repository.
+## Citation
 
-## Design at a glance
+Please cite the accompanying manuscript if you use ExpertHTR. Temporary
+metadata is available in [CITATION.cff](CITATION.cff) and will be updated with
+the final venue and DOI.
 
-![ExpertHTR architecture: multi-task supervision over a Qwen3.5 decoder with a shared-expert Sparse MoE layer.](docs/assets/experthtr-architecture.png)
+## License
 
-For a selected decoder layer \(l\) and token state \(h_{l,t}\), the router creates a Sparsegen-normalized distribution \(p_{l,t}\) over four routed MLP copies. A fifth, shared MLP is always evaluated:
-
-\[
-\tilde h_{l,t} = (1-\alpha)\sum_{e=1}^{4} p_{l,t,e} E_{l,e}(h_{l,t}) + \alpha S_l(h_{l,t}), \qquad \alpha=0.25.
-\]
-
-Every expert begins as a copy of the corresponding dense MLP. Thus the inserted module preserves the inherited MLP function at initialization up to numerical precision; training, not a random architectural jump, creates specialization.
-
-The optimization objective is the answer-token HTR loss plus two small routed-expert regularizers:
-
-\[
-\mathcal L = \mathcal L_{\mathrm{HTR}} + 0.01\,\mathcal L_{\mathrm{LamSparse}} + 0.01\,\mathcal L_{\mathrm{balance}}.
-\]
-
-`router CE`, token unlikelihood, group-balanced sampling, source-balanced sampling, augmentation, and bbox prediction are disabled in the frozen arm. Full definitions and limitations are in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
-
-## Responsible reporting
-
-- Report micro page-CER by source and overall. The canonical metric removes only synthetic `[Rk]:` headers and evaluates `<del>` and `<gap>` as atomic units; it retains physical newlines, spaces, and punctuation.
-- Treat WER on Han text as not directly comparable to whitespace-delimited Latin-script WER unless a Chinese segmentation policy is separately defined.
-- Do not select a checkpoint by test CER. The test evaluator records the selected checkpoint and emits predictions, source-level metrics, generation caps, EOS rates, loop diagnostics, and latency.
-- Do not claim source/script-disentangled expert specialization: four routed experts are source-agnostic, and source distributions remain confounded with language, handwriting style, layout, and text length.
-- Do not claim compute savings without measured FLOPs/latency under a fixed hardware and decoding protocol. Sparse support does not itself establish an end-to-end efficiency claim.
-
-## Citation and licensing
-
-The code and documentation originally authored for ExpertHTR are licensed under
-[Apache-2.0](LICENSE). The temporary manuscript metadata is in
-[CITATION.cff](CITATION.cff); update it with the final repository URL, venue,
-publication year, and DOI when available.
-
-Raw datasets, derived dataset artifacts, base-model weights, and fine-tuned
-checkpoints are not covered by Apache-2.0 and are not redistributed here. Their
-release conditions are documented in [DATA_LICENSES.md](DATA_LICENSES.md) and
-[MODEL_CARD.md](MODEL_CARD.md).
-
-## Status
-
-This release is a **reproducibility package**, not a pretrained-model release. It intentionally covers the supervised MoE-balance pipeline only; PPO/RL fine-tuning and the alternate IAM-line transfer protocol are separate experiments and are not folded into this code path. Final scientific claims still require the selected checkpoint manifest, matching token audit, held-out test artifacts, and the exact environment captured for the reported run.
+The original ExpertHTR code is released under the
+[Apache-2.0 License](LICENSE). Datasets, base-model weights, and fine-tuned
+checkpoints have separate licenses and are not redistributed in this repository.
