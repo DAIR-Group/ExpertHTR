@@ -1,0 +1,53 @@
+# Python and notebook state
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.egg-info/
+*.egg-info/
+build/
+dist/
+.ipynb_checkpoints/
+.DS_Store
+
+# Local environments and secrets
+.venv/
+venv/
+env/
+.env
+.env.*
+!configs/paths.env.example
+
+# Data, checkpoints, and generated experiment artifacts are intentionally not versioned.
+data/
+datasets/
+checkpoints/
+outputs/
+runs/
+wandb/
+artifacts/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+*.onnx
+
+# Large, generated evaluation artifacts
+*_predictions*.jsonl
+*_metrics*.json
+routing_visualizations*/
+token_audit*/
+run_manifest*.json
+run_summary.json
+run_config.json
+training_history.jsonl
+checkpoint_manifest.json
+metadata.json
+CHECKPOINT_COMPLETE
+
+# Kaggle/Hugging Face caches and downloaded model bundles
+.cache/
+hf_cache/
+offline_bundle/

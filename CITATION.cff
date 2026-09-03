@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use ExpertHTR, please cite the accompanying manuscript."
+title: "ExpertHTR: Unified Multi-Task Learning with Language-Guided Experts for Handwritten Text Recognition"
+version: 0.1.0
+license: Apache-2.0
+authors:
+  - family-names: Dang
+    given-names: Hoai Nam
+  - family-names: Nguyen
+    given-names: Duy Hieu
+  - family-names: Vo
+    given-names: Nguyen Le Duy

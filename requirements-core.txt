@@ -1,0 +1,21 @@
+# This is a minimal runtime specification, not a lock file.
+# Export `pip freeze` from the exact training image and preserve the offline
+# wheelhouse/model hashes before making a paper-level reproducibility claim.
+torch
+transformers==5.12.1
+accelerate
+peft
+sentencepiece
+safetensors
+einops
+numpy
+pillow
+tqdm
+matplotlib
+ipywidgets
+editdistance
+albumentations
+opencv-python-headless
+wandb
+PyYAML
+nbformat

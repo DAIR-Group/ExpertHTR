@@ -1,0 +1,116 @@
+# Frozen paper-facing reference configuration for ExpertHTR v0.1.0.
+# This file documents the executable Python workflow contract. It contains no private
+# filesystem paths, dataset files, model weights, or checkpoint state.
+
+experiment:
+  id: sparsegen_shared_lamsparse_balance
+  initialization: dense_checkpoint
+  continuation_epochs: 1
+  selection_rule: minimum_validation_micro_page_cer
+  test_rule: evaluate_once_after_validation_selection
+
+data:
+  artifact: mthtr/page_multitask
+  excluded_sources: [Eparchos]
+  expected_sources:
+    - BRESSAY
+    - Bentham
+    - HWDB2.0
+    - IAM
+    - ICFHR2016
+    - Images_Courriers
+    - ScribbleLens
+  expected_records:
+    train: 20388
+    valid: 962
+    test: 1327
+  tasks:
+    train:
+      page_htr: 4393
+      line_count: 4393
+      phrase_line_lookup: 4393
+      line_range_htr: 7209
+    valid:
+      page_htr: 962
+    test:
+      page_htr: 1327
+  traversal: full_pass
+  source_balanced_sampler: false
+  group_balanced_sampler: false
+  augmentation: false
+  bbox_prediction: disabled
+
+transcription:
+  atomic_markers: ["<del>", "<gap>"]
+  page_headers: "[Rk]:"
+  physical_line_separator: "\\n"
+  region_separator: "\\n\\n"
+  cer: micro_page_cer
+
+model:
+  family: Qwen3.5-0.8B-Base
+  precision: bf16
+  gradient_checkpointing: true
+  max_text_length: 2560
+  generation:
+    decoding: greedy
+    max_new_tokens: 1024
+  image:
+    resize_policy: area_ratio
+    min_pixels: 589824
+    max_pixels: 1572864
+    max_aspect_ratio: 200
+
+moe:
+  routing: sparsegen
+  routing_grouping: unsupervised4
+  routed_experts_per_layer: 4
+  shared_experts_per_layer: 1
+  shared_mix: 0.25
+  layer_indices: [1, 5, 9, 13, 17, 21]
+  sparsegen_hidden: 128
+  sparsegen_epsilon: 0.01
+  hard_top_k: false
+  router_cross_entropy_coefficient: 0.0
+  lam_sparse:
+    coefficient: 0.01
+    warmup_fraction_of_epoch: 0.10
+  load_balance:
+    coefficient: 0.01
+    warmup_fraction_of_epoch: 0.10
+  expert_initialization: copy
+  expert_train_dtype: match_base
+  freeze_inherited_base: false
+
+optimization:
+  optimizer: AdamW
+  learning_rate: 1.0e-6
+  weight_decay: 0.01
+  global_gradient_clip_norm: 1.0
+  per_device_batch_size: 2
+  gradient_accumulation_steps: 16
+  effective_batch_size: 32
+  warmup_updates: 40
+  scheduler: cosine
+  scheduler_epochs: 1
+  microbatch_invariant_token_loss: true
+  page_htr_terminal_token_weight: 4.0
+  token_unlikelihood_coefficient: 0.0
+
+validation:
+  split: valid
+  task: page_htr
+  report:
+    - per_source_micro_cer
+    - wer
+    - eos_rate
+    - generation_cap_hit_rate
+    - output_reference_token_ratio
+    - loop_diagnostics
+    - marker_counts
+
+release_invariants:
+  - The dense initialization checkpoint must be a verified dense checkpoint.
+  - The model, tokenizer, atomic-marker IDs, prompt, image budget, and context cap must match the checkpoint manifest.
+  - A full token audit is required after any data or input-contract change.
+  - No test checkpoint selection is permitted.
