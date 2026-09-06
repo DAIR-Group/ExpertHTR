@@ -1,4 +1,3 @@
-```markdown
 # ExpertHTR
 
 <p align="center"><em>Unified Handwritten Text Recognition with Multi-Task Learning and Sparse Mixture-of-Experts</em></p>
@@ -12,7 +11,6 @@
     <img src="https://img.shields.io/badge/🤗%20Dataset-Hugging%20Face-yellow" alt="Hugging Face Dataset">
   </a>
 </p>
-```
 
 ExpertHTR is a handwritten text recognition system built on
 [Qwen3.5-0.8B-Base](https://huggingface.co/Qwen/Qwen3.5-0.8B-Base). It learns
@@ -26,11 +24,11 @@ localization, and line-span transcription—and uses a Sparse Mixture-of-Experts
 
 ## Highlights
 
-- Multi-task training for page-level handwritten text recognition.
-- Sparse MoE with four routed experts and one shared expert.
-- Evaluated on seven handwriting benchmarks: BRESSAY, Bentham, HWDB2.0, IAM,
+* Multi-task training for page-level handwritten text recognition.
+* Sparse MoE with four routed experts and one shared expert.
+* Evaluated on seven handwriting benchmarks: BRESSAY, Bentham, HWDB2.0, IAM,
   ICFHR2016, RIMES, and ScribbleLens.
-- **2.92% CER on IAM page-level evaluation** in the current manuscript table.
+* **2.92% CER on IAM page-level evaluation** in the current manuscript table.
 
 ## Installation
 
@@ -42,6 +40,7 @@ cd ExpertHTR
 
 python -m venv .venv
 source .venv/bin/activate
+
 python -m pip install --upgrade pip
 python -m pip install -e .
 python -m pip install -r requirements-core.txt
@@ -89,9 +88,9 @@ See [docs/CLI.md](docs/CLI.md) for all commands and
 
 CER (%) on the seven evaluation datasets; lower is better.
 
-| Method | BRES. | Bent. | HWDB | IAM | READ | RIMES | Scrib. |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Qwen3.5 Base | 51.94 | 27.13 | 25.43 | 11.55 | 124.49 | 31.66 | 91.45 |
+| Method         |     BRES. |     Bent. |     HWDB |      IAM |      READ |    RIMES |    Scrib. |
+| -------------- | --------: | --------: | -------: | -------: | --------: | -------: | --------: |
+| Qwen3.5 Base   |     51.94 |     27.13 |    25.43 |    11.55 |    124.49 |    31.66 |     91.45 |
 | **Sparse MoE** | **19.96** | **17.57** | **4.63** | **2.92** | **52.23** | **5.59** | **42.52** |
 
 The complete comparison table and notes are in [docs/RESULTS.md](docs/RESULTS.md).
@@ -100,13 +99,13 @@ The complete comparison table and notes are in [docs/RESULTS.md](docs/RESULTS.md
 
 ```text
 ExpertHTR/
-├── configs/          # Reference configuration and path template
-├── docs/             # Architecture, data, evaluation, and reproducibility notes
-├── examples/         # Optional notebook walkthrough
-├── scripts/          # Release checks and run-manifest utility
-├── src/experthtr/    # Main Python package
-├── DATA_LICENSES.md  # Dataset license and provenance boundary
-├── MODEL_CARD.md     # Model and checkpoint release information
+├── configs/           # Reference configuration and path template
+├── docs/              # Architecture, data, evaluation, and reproducibility notes
+├── examples/          # Optional notebook walkthrough
+├── scripts/           # Release checks and run-manifest utility
+├── src/experthtr/     # Main Python package
+├── DATA_LICENSES.md   # Dataset license and provenance boundary
+├── MODEL_CARD.md      # Model and checkpoint release information
 └── requirements-core.txt
 ```
 
