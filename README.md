@@ -1,11 +1,18 @@
+```markdown
 # ExpertHTR
 
-<p align="center"><em>Unified Handwritten Text Recognition with Multi-Task Learning and Sparse
-Mixture-of-Experts</em></p>
+<p align="center"><em>Unified Handwritten Text Recognition with Multi-Task Learning and Sparse Mixture-of-Experts</em></p>
 
 <p align="center">
   Dang Hoai Nam &middot; Nguyen Duy Hieu &middot; Vo Nguyen Le Duy
 </p>
+
+<p align="center">
+  <a href="https://huggingface.co/datasets/DAIR-Group/ExpertHTR-Dataset">
+    <img src="https://img.shields.io/badge/🤗%20Dataset-Hugging%20Face-yellow" alt="Hugging Face Dataset">
+  </a>
+</p>
+```
 
 ExpertHTR is a handwritten text recognition system built on
 [Qwen3.5-0.8B-Base](https://huggingface.co/Qwen/Qwen3.5-0.8B-Base). It learns
