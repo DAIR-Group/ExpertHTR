@@ -6,6 +6,10 @@
 
 ExpertHTR fine-tunes Qwen3.5-0.8B-Base for handwritten pages. It jointly learns page transcription, line counting, phrase-to-line lookup and line-range transcription, with four routed experts and one shared expert.
 
+<p align="center">
+  <img src="docs/assets/experthtr-architecture.png" alt="ExpertHTR architecture" width="950">
+</p>
+
 ## Results
 
 The validation-selected checkpoint (`step 1914`) reaches **16.439% micro page CER** on 962 validation pages. CER removes only the leading region marker (`[Rk]:`); `<del>` and `<gap>` remain distinct OCR symbols.
