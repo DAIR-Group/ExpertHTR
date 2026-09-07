@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import subprocess
 import sys
 from pathlib import Path
 
@@ -21,6 +22,22 @@ REQUIRED_CONFIG_SNIPPETS = (
 FORBIDDEN_PATH_FRAGMENTS = ("/home/namhoai", "nguoimot", "namdh1706")
 
 
+def validate_source_visibility(package_root: Path, sources: list[Path]) -> None:
+    """Catch ignore rules that hide source files on the developer's machine."""
+    repository = package_root.resolve().parents[1]
+    if not (repository / ".git").exists():
+        return  # Source distributions need not carry Git metadata.
+    result = subprocess.run(
+        ["git", "check-ignore", "--no-index", "--",
+         *(str(path.resolve().relative_to(repository)) for path in sources)],
+        cwd=repository, capture_output=True, text=True, check=False,
+    )
+    if result.returncode == 0:
+        raise ValueError(f"Package source files are hidden by Git ignore rules:\n{result.stdout}")
+    if result.returncode != 1:
+        raise RuntimeError(f"Could not check source visibility: {result.stderr}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -35,6 +52,7 @@ def main() -> None:
     )
     if not sources:
         raise FileNotFoundError(f"No Python package sources found under {package_root}")
+    validate_source_visibility(package_root, sources)
     if (package_root / "stages").exists():
         raise ValueError("Deprecated stages/ directory is present; publish only named Python modules.")
 

@@ -17,6 +17,22 @@ This repository can reproduce the **code path** immediately. Reproducing a repor
 | Run/checkpoint/prediction manifests | yes | generated locally |
 | Dependency lock and wheel hashes | yes | generated locally |
 
+## Notebook lineage check
+
+To verify the core computation against the original author notebook without
+executing training, run:
+
+```bash
+python scripts/check_notebook_parity.py /path/to/moe_dense_warmstart_ablation.ipynb
+```
+
+This compares function/class ASTs for metrics, training/evaluation, MoE,
+checkpoint helpers, and dataset/collator code, allowing docstring indentation
+changes caused by wrapping cells in functions. It prints the notebook SHA-256.
+It does not claim that configuration, CLI orchestration, routing reports, or
+runtime artifacts are identical. See [NOTEBOOK_REVIEW.md](NOTEBOOK_REVIEW.md)
+for the checked scope and the CLI fixes.
+
 ## Input contract
 
 Before running, make the following decisions explicit in the configuration stage or shell environment, never by an inherited interactive-session environment variable:

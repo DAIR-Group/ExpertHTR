@@ -8,6 +8,7 @@ explicit CLI workflow and exports its declared runtime objects into a
 from __future__ import annotations
 
 from experthtr.runtime.context import RuntimeState, export_runtime_locals
+from experthtr.evaluation.checkpoint_contract import validate_atomic_marker_contract
 
 
 def run_routing_analysis(state: RuntimeState) -> RuntimeState:
@@ -117,8 +118,7 @@ def run_routing_analysis(state: RuntimeState) -> RuntimeState:
     routing_checkpoint_signature = dict(routing_manifest.get("moe_signature") or {})
     if not routing_checkpoint_signature:
         raise RuntimeError("Checkpoint manifest has no moe_signature; cannot verify the routing architecture.")
-    if list(routing_manifest.get("atomic_ocr_markers") or []) != list(CFG.get("atomic_ocr_markers", [])):
-        raise RuntimeError("Routing checkpoint atomic-marker contract differs from the active runtime.")
+    validate_atomic_marker_contract(routing_manifest, CFG)
     try:
         _routing_payload = torch.load(
             routing_checkpoint / FULL_MODEL_STATE_FILE, map_location="cpu", weights_only=True

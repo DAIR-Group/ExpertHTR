@@ -8,6 +8,7 @@ explicit CLI workflow and exports its declared runtime objects into a
 from __future__ import annotations
 
 from experthtr.runtime.context import RuntimeState, export_runtime_locals
+from experthtr.runtime.artifacts import prepare_output_directory
 
 
 def configure_runtime(state: RuntimeState) -> RuntimeState:
@@ -391,7 +392,8 @@ def configure_runtime(state: RuntimeState) -> RuntimeState:
         LOGGER.warning("wandb is not installed. Disabling HWVLM_USE_WANDB for this run.")
         CFG["use_wandb"] = False
 
-    os.makedirs(CFG["output_dir"], exist_ok=True)
+    state["CFG"] = CFG
+    output_dir = prepare_output_directory(state)
     print("Configuration:")
     for k, v in CFG.items():
         print(f"  {k}: {v}")

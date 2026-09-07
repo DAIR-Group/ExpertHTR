@@ -8,6 +8,7 @@ explicit CLI workflow and exports its declared runtime objects into a
 from __future__ import annotations
 
 from experthtr.runtime.context import RuntimeState, export_runtime_locals
+from experthtr.evaluation.checkpoint_contract import validate_atomic_marker_contract
 
 
 def run_position_diagnostics(state: RuntimeState) -> RuntimeState:
@@ -71,8 +72,7 @@ def run_position_diagnostics(state: RuntimeState) -> RuntimeState:
     posdiag_manifest = json.loads(
         (posdiag_checkpoint / CHECKPOINT_MANIFEST_FILE).read_text(encoding="utf-8")
     )
-    if list(posdiag_manifest.get("atomic_ocr_markers") or []) != list(CFG.get("atomic_ocr_markers", [])):
-        raise RuntimeError("Checkpoint atomic-marker contract differs from the active processor/runtime.")
+    validate_atomic_marker_contract(posdiag_manifest, CFG)
 
     if str(POSITION_DIAG_OUTPUT_DIR).strip():
         posdiag_output_dir = Path(POSITION_DIAG_OUTPUT_DIR).expanduser()

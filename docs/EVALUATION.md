@@ -21,9 +21,18 @@ For reference \(r_i\) and prediction \(p_i\), page CER is aggregated micro-style
 Before Levenshtein distance, both strings use the same minimal evaluation transform:
 
 1. normalize CRLF/CR to LF;
-2. remove only synthetic `[Rk]:` or `[Para k]:` formatting headers;
+2. remove synthetic region headers `[Rk]:` (and legacy `[Parak]:`, with no space before the numeric index) at the start of a line, including adjacent horizontal indentation;
 3. encode `<del>` and `<gap>` as two distinct single comparison units;
-4. preserve all remaining transcription, including spaces, punctuation, and physical newlines.
+4. strip whitespace at the two outer edges of the complete page, as in the reference notebook; preserve internal spaces, punctuation, and newlines.
+
+Here `k` is a numeric region index: `[R1]:` and `[Para1]:` are removed,
+while literal `R` characters in the transcription are retained. For example,
+`[R1]: Red\n[R2]: ink` becomes `Red\nink`. The transform does not collapse
+internal blank lines or remove a newline merely because a region header occupied
+that line. Region numbering accuracy is a separate structural diagnostic.
+Both references and predictions receive this same transform before micro
+aggregation. These rules preserve the metric in `moe_dense_warmstart_ablation.ipynb`;
+they do not introduce a new scoring policy.
 
 This is a canonical page-CER, not a tokenizer metric and not a formatting-insensitive OCR score. If a raw serialization CER, text-only diagnostic CER, or safety CER is additionally reported, name it explicitly and never substitute it for the primary value.
 

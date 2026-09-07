@@ -19,6 +19,16 @@ phases from `config`, `runtime`, `data`, `modeling`, `training`, `evaluation`,
 Use `experthtr COMMAND --print-phases` before a new release or code review to
 show exactly which named components are executed for that command.
 
+Only `train` writes `dense_to_moe_initialization.json` and `sampling_plan.json`.
+Auditing a new run does not populate its training directory, so `audit` followed
+by `train` works with the same configuration. A new `train` still refuses a
+nonempty training directory. Evaluation and analysis can use an existing run
+directory without overwriting those training provenance files.
+
+Evaluation checkpoints must contain both `atomic_ocr_markers` and matching
+`atomic_ocr_marker_ids` in their manifest. Missing IDs require the original
+checkpoint/tokenizer provenance to be recovered; do not guess them.
+
 ## Required environment variables
 
 Read paths from `configs/paths.env.example`; never hard-code a user path in a

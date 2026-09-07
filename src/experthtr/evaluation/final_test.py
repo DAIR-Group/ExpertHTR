@@ -8,11 +8,13 @@ explicit CLI workflow and exports its declared runtime objects into a
 from __future__ import annotations
 
 from experthtr.runtime.context import RuntimeState, export_runtime_locals
+from experthtr.evaluation.checkpoint_contract import validate_atomic_marker_contract
 
 
 def run_final_test(state: RuntimeState) -> RuntimeState:
     """Execute this phase after its prerequisites have populated ``state``."""
 
+    state.require("CFG", "model")
     globals().update(state.values)
     # =============================================================================
     # FINAL TEST — validation-selected checkpoint only
@@ -30,13 +32,7 @@ def run_final_test(state: RuntimeState) -> RuntimeState:
     if FINAL_TEST_BATCH_SIZE != 1:
         raise ValueError("Final test uses batch_size=1 so reported s/page is comparable latency.")
 
-    if "output_dir" not in globals() or "model" not in globals():
-        raise RuntimeError(
-            "Final test requires a constructed model, processor, and output directory. "
-            "Invoke it through `experthtr final-test`."
-        )
-
-    output_dir = Path(output_dir)
+    output_dir = Path(state["CFG"]["output_dir"])
     if FINAL_TEST_CHECKPOINT_DIR.strip():
         final_test_checkpoint = Path(FINAL_TEST_CHECKPOINT_DIR).expanduser()
     else:
@@ -64,8 +60,7 @@ def run_final_test(state: RuntimeState) -> RuntimeState:
             "Final-test checkpoint architecture differs from the currently constructed model. "
             f"checkpoint={final_manifest.get('moe_signature')} current={_moe_signature()}"
         )
-    if list(final_manifest.get("atomic_ocr_markers") or []) != list(CFG["atomic_ocr_markers"]):
-        raise RuntimeError("Final-test checkpoint atomic-marker policy differs from the active runtime.")
+    validate_atomic_marker_contract(final_manifest, CFG)
 
     try:
         checkpoint_payload = torch.load(

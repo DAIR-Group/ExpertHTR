@@ -20,7 +20,8 @@ env/
 !configs/paths.env.example
 
 # Data, checkpoints, and generated experiment artifacts are intentionally not versioned.
-data/
+/data/
+hf_model_release/
 datasets/
 checkpoints/
 outputs/

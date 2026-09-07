@@ -421,16 +421,11 @@ def build_model(state: RuntimeState) -> RuntimeState:
     CFG["moe_mlp_replaced"] = int(moe_mlp_replaced)
 
     ablation_output_dir = Path(CFG["output_dir"])
-    if ablation_output_dir.exists() and any(ablation_output_dir.iterdir()) and not CFG["dense_init_allow_existing_output"]:
-        raise FileExistsError(
-            f"Refusing to mix ablation outputs in a nonempty directory: {ablation_output_dir}. "
-            "Change the run tag or explicitly set ALLOW_EXISTING_OUTPUT_DIR=True."
+    if state.command == "train":
+        (ablation_output_dir / "dense_to_moe_initialization.json").write_text(
+            json.dumps(DENSE_INITIALIZATION, ensure_ascii=False, indent=2, default=str) + "\n",
+            encoding="utf-8",
         )
-    ablation_output_dir.mkdir(parents=True, exist_ok=True)
-    (ablation_output_dir / "dense_to_moe_initialization.json").write_text(
-        json.dumps(DENSE_INITIALIZATION, ensure_ascii=False, indent=2, default=str) + "\n",
-        encoding="utf-8",
-    )
 
     GENERATION_STOP_IDS = resolve_generation_stop_ids(processor.tokenizer, model)
     _training_terminal_ids = _token_id_list(getattr(processor.tokenizer, "eos_token_id", None))
