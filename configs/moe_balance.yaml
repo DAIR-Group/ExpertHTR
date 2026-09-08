@@ -5,7 +5,7 @@
 experiment:
   id: sparsegen_shared_lamsparse_balance
   initialization: dense_checkpoint
-  continuation_epochs: 1
+  continuation_epochs: 3
   selection_rule: minimum_validation_micro_page_cer
   test_rule: evaluate_once_after_validation_selection
 
@@ -84,15 +84,15 @@ moe:
 
 optimization:
   optimizer: AdamW
-  learning_rate: 1.0e-6
+  learning_rate: 4.0e-6
   weight_decay: 0.01
   global_gradient_clip_norm: 1.0
-  per_device_batch_size: 2
-  gradient_accumulation_steps: 16
+  per_device_batch_size: 4
+  gradient_accumulation_steps: 8
   effective_batch_size: 32
-  warmup_updates: 40
+  warmup_updates: 100
   scheduler: cosine
-  scheduler_epochs: 1
+  scheduler_epochs: 3
   microbatch_invariant_token_loss: true
   page_htr_terminal_token_weight: 4.0
   token_unlikelihood_coefficient: 0.0

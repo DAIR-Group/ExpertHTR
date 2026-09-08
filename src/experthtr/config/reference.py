@@ -161,13 +161,13 @@ def configure(state: RuntimeState) -> RuntimeState:
     # -------------------------------------------------------------------------
     # Frozen common conditions. Change only in a new, clearly named experiment.
     # -------------------------------------------------------------------------
-    TRAIN_EPOCHS = 1
-    SCHEDULER_EPOCHS = 1
-    BATCH_SIZE = 2
-    GRAD_ACC = 16                       # effective batch = 32
-    ADAPT_LR = "1e-6"                  # fresh optimizer after dense transfer
+    TRAIN_EPOCHS = 3
+    SCHEDULER_EPOCHS = 3
+    BATCH_SIZE = 4
+    GRAD_ACC = 8                        # effective batch = 32
+    ADAPT_LR = "4e-6"                  # fresh optimizer after dense transfer
     # Fixed across ablation arms. The realised fraction is printed after the loader is built.
-    WARMUP_STEPS = "40"
+    WARMUP_STEPS = "100"
 
     RESOLUTION_PROFILE = "area_ratio_min589824_max1572864_ctx2560"
     IMAGE_MIN_PIXELS = "589824"
@@ -197,7 +197,7 @@ def configure(state: RuntimeState) -> RuntimeState:
         f"page_multitask_moe_ablation_v2_{MOE_ABLATION_VARIANT}_"
         f"{('topk' + str(TOP_K)) if ABLATION['enforce_top_k'] else 'native_sparsegen'}_routed{ROUTING_EXPERTS[ROUTING_GROUPING]}_shared{ABLATION['shared_experts']}_{INIT_MODE}_{init_tag}_"
         f"{freeze_tag}_l{'_'.join(map(str, MOE_LAYER_INDICES))}_bs{BATCH_SIZE}ga{GRAD_ACC}_"
-        f"lr{ADAPT_LR}_epoch1_{RUN_SUFFIX.strip()}"
+        f"lr{ADAPT_LR}_epoch3_{RUN_SUFFIX.strip()}"
     )
 
     # Clear stale branch variables.  The dense checkpoint contributes weights
