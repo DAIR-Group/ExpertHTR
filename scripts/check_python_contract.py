@@ -24,7 +24,7 @@ FORBIDDEN_PATH_FRAGMENTS = ("/home/namhoai", "nguoimot", "namdh1706")
 
 def validate_source_visibility(package_root: Path, sources: list[Path]) -> None:
     """Catch ignore rules that hide source files on the developer's machine."""
-    repository = package_root.resolve().parents[1]
+    repository = package_root.resolve().parent
     if not (repository / ".git").exists():
         return  # Source distributions need not carry Git metadata.
     result = subprocess.run(
@@ -43,7 +43,7 @@ def main() -> None:
     parser.add_argument(
         "--package-root",
         type=Path,
-        default=Path(__file__).resolve().parents[1] / "src" / "experthtr",
+        default=Path(__file__).resolve().parents[1] / "expert",
     )
     args = parser.parse_args()
     package_root = args.package_root
@@ -69,7 +69,7 @@ def main() -> None:
         raise ValueError("The public workflow must not use dynamic source execution.")
 
     sys.path.insert(0, str(package_root.parent))
-    from experthtr.workflow import validate_phase_imports
+    from expert.workflow import validate_phase_imports
 
     phases = validate_phase_imports()
     print(f"PASS: compiled {len(sources)} package files and registered {len(phases)} named phases")

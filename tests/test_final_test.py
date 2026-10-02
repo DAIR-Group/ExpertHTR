@@ -7,8 +7,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from experthtr.evaluation.final_test import run_final_test
-from experthtr.runtime.context import RuntimeState
+from expert.evaluation.final_test import run_final_test
+from expert.runtime.context import RuntimeState
 
 
 class FinalTestTests(unittest.TestCase):

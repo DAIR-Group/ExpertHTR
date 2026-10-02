@@ -3,8 +3,8 @@
 import re
 import unittest
 
-from experthtr.evaluation.metrics import register_metrics
-from experthtr.runtime.context import RuntimeState
+from expert.evaluation.metrics import register_metrics
+from expert.runtime.context import RuntimeState
 
 
 class PageCERTests(unittest.TestCase):

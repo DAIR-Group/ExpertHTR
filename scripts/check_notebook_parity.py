@@ -77,7 +77,7 @@ def main() -> None:
             if isinstance(node, DEFINITIONS):
                 originals.setdefault(node.name, []).append(fingerprint(node))
 
-    package = Path(__file__).resolve().parents[1] / "src" / "experthtr"
+    package = Path(__file__).resolve().parents[1] / "expert"
     count = 0
     mismatches = []
     for relative in CORE_MODULES:

@@ -24,8 +24,7 @@ setup(
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
     ],
-    package_dir={"": "src"},
-    packages=find_packages(where="src"),
+    packages=find_packages(),
     install_requires=["PyYAML>=5.4"],
-    entry_points={"console_scripts": ["experthtr=experthtr.cli:main"]},
+    entry_points={"console_scripts": ["experthtr=expert.cli:main"]},
 )

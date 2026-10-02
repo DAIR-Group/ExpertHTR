@@ -13,10 +13,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from experthtr.cli import main
-from experthtr.config.reference import configure
-from experthtr.runtime.context import RuntimeState
-from experthtr.workflow import available_commands, phase_names_for, validate_phase_imports
+from expert.cli import main
+from expert.config.reference import configure
+from expert.runtime.context import RuntimeState
+from expert.workflow import available_commands, phase_names_for, validate_phase_imports
 
 
 class PublicContractTests(unittest.TestCase):

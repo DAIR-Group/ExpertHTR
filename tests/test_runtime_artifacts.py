@@ -6,8 +6,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from experthtr.runtime.artifacts import prepare_output_directory
-from experthtr.runtime.context import RuntimeState
+from expert.runtime.artifacts import prepare_output_directory
+from expert.runtime.context import RuntimeState
 
 validate_source_visibility = runpy.run_path(
     str(Path(__file__).resolve().parents[1] / "scripts" / "check_python_contract.py")
@@ -34,7 +34,7 @@ class RuntimeArtifactTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as root:
             root = Path(root)
             subprocess.run(["git", "init", "-q", str(root)], check=True)
-            package = root / "src" / "experthtr"
+            package = root / "expert"
             source = package / "data" / "dataset.py"
             source.parent.mkdir(parents=True)
             source.write_text("# source\n")
